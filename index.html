@@ -80,7 +80,7 @@ async function salvar() {
     const quantidade = document.getElementById('quantidade').value;
     const preco = document.getElementById('preco').value;
 
-    await supabase.from('produtos').insert([
+    await supabase.from('produto').insert([
         { nome, quantidade, preco }
     ]);
 
@@ -90,7 +90,7 @@ async function salvar() {
 
 // LISTAR PRODUTOS
 async function listar() {
-    const { data } = await supabase.from('produtos').select('*');
+    const { data } = await supabase.from('produto').select('*');
 
     const tbody = document.querySelector("#tabela tbody");
     tbody.innerHTML = "";
@@ -111,7 +111,7 @@ async function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const { data } = await supabase.from('produtos').select('*');
+    const { data } = await supabase.from('produto').select('*');
 
     let y = 10;
 
