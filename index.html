@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Controle de Estoque</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 20px;
+}
+
+input, button {
+    margin: 5px;
+    padding: 8px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: gray;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>Controle de Estoque</h2>
+
+<input id="nome" placeholder="Nome do Produto">
+<input id="quantidade" type="number" placeholder="Quantidade">
+<input id="preco" type="number" placeholder="Preço">
+
+<button onclick="salvar()">Salvar</button>
+<button onclick="gerarPDF()">Gerar PDF</button>
+
+<h3>Lista</h3>
+
+<table id="tabela">
+<thead>
+<tr>
+<th>Nome</th>
+<th>Quantidade</th>
+<th>Preço</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<footer>
+Desenvolvido pelo Departamento de Tecnologia da SME/Juina
+</footer>
+
+<script>
+
+// CONFIG SUPABASE
+const supabase = supabase.createClient(
+  "https://rslqscjzdvlfelgwopgv.supabase.co",
+  "sb_publishable_jlA0fUSFzoLR_sJjeCstHQ_MznZjoTc"
+);
+
+// SALVAR PRODUTO
+async function salvar() {
+    const nome = document.getElementById('nome').value;
+    const quantidade = document.getElementById('quantidade').value;
+    const preco = document.getElementById('preco').value;
+
+    await supabase.from('produtos').insert([
+        { nome, quantidade, preco }
+    ]);
+
+    alert("Salvo!");
+    listar();
+}
+
+// LISTAR PRODUTOS
+async function listar() {
+    const { data } = await supabase.from('produtos').select('*');
+
+    const tbody = document.querySelector("#tabela tbody");
+    tbody.innerHTML = "";
+
+    data.forEach(item => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${item.nome}</td>
+            <td>${item.quantidade}</td>
+            <td>${item.preco}</td>
+        </tr>
+        `;
+    });
+}
+
+// GERAR PDF
+async function gerarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const { data } = await supabase.from('produtos').select('*');
+
+    let y = 10;
+
+    doc.text("Relatório de Estoque", 10, y);
+    y += 10;
+
+    data.forEach(item => {
+        doc.text(
+            `${item.nome} - Qtd: ${item.quantidade} - R$ ${item.preco}`,
+            10,
+            y
+        );
+        y += 10;
+    });
+
+    doc.text(
+        "Desenvolvido pelo Departamento de Tecnologia da SME/Juina",
+        10,
+        y + 10
+    );
+
+    doc.save("relatorio.pdf");
+}
+
+// CARREGAR AO ABRIR
+listar();
+
+</script>
+
+</body>
+</html>
